@@ -237,10 +237,11 @@ func TestParseLmstatLicenseInfoFeature(t *testing.T) {
 	)
 
 	for username, licused := range licUsersByFeature["feature34"] {
-		var totalLic float64 = 0
+		var totalLic float64
 		for _, lu := range licused {
 			totalLic += lu.num
 		}
+
 		switch username {
 		case "user1":
 			if totalLic != licUsed16 {
@@ -269,10 +270,11 @@ func TestParseLmstatLicenseInfoFeature(t *testing.T) {
 	foundCmfy211 := false
 
 	for username, licused := range licUsersByFeature["feature31"] {
-		var totalLic float64 = 0
+		var totalLic float64
 		for _, lu := range licused {
 			totalLic += lu.num
 		}
+
 		switch username {
 		case "user33":
 			if totalLic != licUsed16 {
@@ -305,10 +307,11 @@ func TestParseLmstatLicenseInfoFeature(t *testing.T) {
 	)
 
 	for username, licused := range licUsersByFeature["feature100"] {
-		var totalLic float64 = 0
+		var totalLic float64
 		for _, lu := range licused {
 			totalLic += lu.num
 		}
+
 		switch username {
 		case "user13":
 			if totalLic != licUsed1 {

@@ -322,7 +322,8 @@ func parseLmstatLicenseInfoFeature(outStr [][]string, logger *slog.Logger) (feat
 				var found = -1
 
 				for i := range licUsersByFeature[featureName][username] {
-					if licUsersByFeature[featureName][username][i].version == matches["ver"] && licUsersByFeature[featureName][username][i].hostname == matches["hostname"] {
+					if licUsersByFeature[featureName][username][i].version == matches["ver"] &&
+						licUsersByFeature[featureName][username][i].hostname == matches["hostname"] {
 						found = i
 					}
 				}
@@ -342,13 +343,15 @@ func parseLmstatLicenseInfoFeature(outStr [][]string, logger *slog.Logger) (feat
 				}
 
 				for i := range licUsersByFeature[featureName][username] {
-					if licUsersByFeature[featureName][username][i].version == matches["ver"] && licUsersByFeature[featureName][username][i].hostname == matches["hostname"] {
+					if licUsersByFeature[featureName][username][i].version == matches["ver"] &&
+						licUsersByFeature[featureName][username][i].hostname == matches["hostname"] {
 						licUsersByFeature[featureName][username][i].num += float64(licUsed)
 					}
 				}
 			} else {
 				for i := range licUsersByFeature[featureName][username] {
-					if licUsersByFeature[featureName][username][i].version == matches["ver"] && licUsersByFeature[featureName][username][i].hostname == matches["hostname"] {
+					if licUsersByFeature[featureName][username][i].version == matches["ver"] &&
+						licUsersByFeature[featureName][username][i].hostname == matches["hostname"] {
 						licUsersByFeature[featureName][username][i].num += 1.0
 					}
 				}
