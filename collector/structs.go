@@ -39,9 +39,10 @@ type feature struct {
 }
 
 type featureUserUsed struct {
-	num     float64
-	version string
-	since   string
+	num      float64
+	version  string
+	since    string
+	hostname string
 }
 
 type featureExp struct {

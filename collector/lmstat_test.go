@@ -237,25 +237,27 @@ func TestParseLmstatLicenseInfoFeature(t *testing.T) {
 	)
 
 	for username, licused := range licUsersByFeature["feature34"] {
-		for i := range licused {
-			switch username {
-			case "user1":
-				if licused[i].num != licUsed16 {
-					t.Fatalf("Unexpected values for feature34[%s]: %v!=16",
-						username, licused[i].num)
-				}
-			case "user11":
-				foundUser11 = true
+		var totalLic float64 = 0
+		for _, lu := range licused {
+			totalLic += lu.num
+		}
+		switch username {
+		case "user1":
+			if totalLic != licUsed16 {
+				t.Fatalf("Unexpected values for feature34[%s]: %v!=16",
+					username, totalLic)
+			}
+		case "user11":
+			foundUser11 = true
 
-				if licused[i].num != licUsed26 {
-					t.Fatalf("Unexpected values for feature34[%s]: %v!=26",
-						username, licused[i].num)
-				}
-			case "user17":
-				if licused[i].num != licUsed12 {
-					t.Fatalf("Unexpected values for feature34[%s]: %v!=12",
-						username, licused[i].num)
-				}
+			if totalLic != licUsed26 {
+				t.Fatalf("Unexpected values for feature34[%s]: %v!=26",
+					username, totalLic)
+			}
+		case "user17":
+			if totalLic != licUsed12 {
+				t.Fatalf("Unexpected values for feature34[%s]: %v!=12",
+					username, totalLic)
 			}
 		}
 	}
@@ -267,25 +269,27 @@ func TestParseLmstatLicenseInfoFeature(t *testing.T) {
 	foundCmfy211 := false
 
 	for username, licused := range licUsersByFeature["feature31"] {
-		for i := range licused {
-			switch username {
-			case "user33":
-				if licused[i].num != licUsed16 {
-					t.Fatalf("Unexpected values for feature31[%s]: %v!=16",
-						username, licused[i].num)
-				}
-			case "cmfy211":
-				foundCmfy211 = true
+		var totalLic float64 = 0
+		for _, lu := range licused {
+			totalLic += lu.num
+		}
+		switch username {
+		case "user33":
+			if totalLic != licUsed16 {
+				t.Fatalf("Unexpected values for feature31[%s]: %v!=16",
+					username, totalLic)
+			}
+		case "cmfy211":
+			foundCmfy211 = true
 
-				if licused[i].num != licUsed1 {
-					t.Fatalf("Unexpected values for feature31[%s]: %v!=1",
-						username, licused[i].num)
-				}
-			case "cmfy212":
-				if licused[i].num != licUsed16 {
-					t.Fatalf("Unexpected values for feature31[%s]: %v!=16",
-						username, licused[i].num)
-				}
+			if totalLic != licUsed1 {
+				t.Fatalf("Unexpected values for feature31[%s]: %v!=1",
+					username, totalLic)
+			}
+		case "cmfy212":
+			if totalLic != licUsed16 {
+				t.Fatalf("Unexpected values for feature31[%s]: %v!=16",
+					username, totalLic)
 			}
 		}
 	}
@@ -301,21 +305,23 @@ func TestParseLmstatLicenseInfoFeature(t *testing.T) {
 	)
 
 	for username, licused := range licUsersByFeature["feature100"] {
-		for i := range licused {
-			switch username {
-			case "user13":
-				if licused[i].num != licUsed1 {
-					t.Fatalf("Unexpected values for feature1[%s]: %v!=1",
-						username, licused[i].num)
-				}
-			case "Administrator":
-				// There is 2 users, and this should always enter here.
-				found = true
-			case "John Doe":
-				foundJohnDoe = true
-			case "Jane Doe Jr.":
-				foundJaneDoe = true
+		var totalLic float64 = 0
+		for _, lu := range licused {
+			totalLic += lu.num
+		}
+		switch username {
+		case "user13":
+			if totalLic != licUsed1 {
+				t.Fatalf("Unexpected values for feature1[%s]: %v!=1",
+					username, totalLic)
 			}
+		case "Administrator":
+			// There is 2 users, and this should always enter here.
+			found = true
+		case "John Doe":
+			foundJohnDoe = true
+		case "Jane Doe Jr.":
+			foundJaneDoe = true
 		}
 	}
 

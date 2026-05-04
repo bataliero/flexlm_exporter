@@ -81,12 +81,12 @@ func NewLmstatCollector(logger *slog.Logger) (Collector, error) {
 		lmstatFeatureUsedUsers: prometheus.NewDesc(
 			prometheus.BuildFQName(namespace, "feature", "used_users"),
 			"License feature used by user labeled by app, feature name and "+
-				"username of the license.", []string{"app", "name", "user", "since"}, nil,
+				"username of the license.", []string{"app", "name", "user", "since", "hostname"}, nil,
 		),
 		lmstatFeatureUsedUsersVersions: prometheus.NewDesc(
 			prometheus.BuildFQName(namespace, "feature", "used_users"),
 			"License feature used by user labeled by app, feature name, "+
-				"username of the license and version.", []string{"app", "name", "user", "since", "version"}, nil,
+				"username of the license and version.", []string{"app", "name", "user", "since", "version", "hostname"}, nil,
 		),
 		lmstatFeatureReservGroups: prometheus.NewDesc(
 			prometheus.BuildFQName(namespace, "feature", "reserved_groups"),
@@ -322,7 +322,7 @@ func parseLmstatLicenseInfoFeature(outStr [][]string, logger *slog.Logger) (feat
 				var found = -1
 
 				for i := range licUsersByFeature[featureName][username] {
-					if licUsersByFeature[featureName][username][i].version == matches["ver"] {
+					if licUsersByFeature[featureName][username][i].version == matches["ver"] && licUsersByFeature[featureName][username][i].hostname == matches["hostname"] {
 						found = i
 					}
 				}
@@ -331,7 +331,7 @@ func parseLmstatLicenseInfoFeature(outStr [][]string, logger *slog.Logger) (feat
 					unixSince := convertLmstatTimeToUnixTime(matches["since"], logger).Unix()
 					sinceString := strconv.FormatInt(unixSince, 10)
 					licUsersByFeature[featureName][username] = append(licUsersByFeature[featureName][username],
-						&featureUserUsed{num: 0, version: matches["ver"], since: sinceString})
+						&featureUserUsed{num: 0, version: matches["ver"], since: sinceString, hostname: matches["hostname"]})
 				}
 			}
 
@@ -342,13 +342,13 @@ func parseLmstatLicenseInfoFeature(outStr [][]string, logger *slog.Logger) (feat
 				}
 
 				for i := range licUsersByFeature[featureName][username] {
-					if licUsersByFeature[featureName][username][i].version == matches["ver"] {
+					if licUsersByFeature[featureName][username][i].version == matches["ver"] && licUsersByFeature[featureName][username][i].hostname == matches["hostname"] {
 						licUsersByFeature[featureName][username][i].num += float64(licUsed)
 					}
 				}
 			} else {
 				for i := range licUsersByFeature[featureName][username] {
-					if licUsersByFeature[featureName][username][i].version == matches["ver"] {
+					if licUsersByFeature[featureName][username][i].version == matches["ver"] && licUsersByFeature[featureName][username][i].hostname == matches["hostname"] {
 						licUsersByFeature[featureName][username][i].num += 1.0
 					}
 				}
@@ -515,7 +515,7 @@ func (c *lmstatCollector) collect(licenses *config.License, ch chan<- prometheus
 					for i := range licused {
 						ch <- prometheus.MustNewConstMetric(
 							c.lmstatFeatureUsedUsersVersions, prometheus.GaugeValue,
-							licused[i].num, licenses.Name, name, username, licused[i].since, licused[i].version)
+							licused[i].num, licenses.Name, name, username, licused[i].since, licused[i].version, licused[i].hostname)
 					}
 				}
 			} else {
@@ -523,7 +523,7 @@ func (c *lmstatCollector) collect(licenses *config.License, ch chan<- prometheus
 					for i := range licused {
 						ch <- prometheus.MustNewConstMetric(
 							c.lmstatFeatureUsedUsers, prometheus.GaugeValue,
-							licused[i].num, licenses.Name, name, username, licused[i].since)
+							licused[i].num, licenses.Name, name, username, licused[i].since, licused[i].hostname)
 					}
 				}
 			}
