@@ -703,3 +703,10 @@ Users of feature52:  (Total of 1814 licenses issued;  Total of 169 licenses in u
 	8 RESERVATIONs for GROUP GROUP13 (host3.domain.net/27002)
 	32 RESERVATIONs for GROUP GROUP12 (host3.domain.net/27002)
 
+Users of feature101:  (Total of 6 licenses issued;  Total of 3 licenses in use)
+
+  "feature101" v6.3, vendor: COMSOL
+  floating license
+
+    <user> <hostname> /dev/pts/1 (v6.3) (<lic-server>/1718 22434), start Mon 2/16 13:14
+    <user2> <hostname> /dev/pts/1 (v6.3) (<lic-server>/1718 10776), start Wed 3/25 7:28
