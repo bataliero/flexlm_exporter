@@ -24,3 +24,8 @@ licenses:
     features_to_include:
     monitor_users: True
     monitor_reservations: False
+  - name: comsol
+    license_server: xxxx
+    monitor_users: true
+    monitor_reservations: true
+    monitor_versions: true

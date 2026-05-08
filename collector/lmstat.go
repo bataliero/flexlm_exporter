@@ -523,7 +523,8 @@ func (c *lmstatCollector) collect(licenses *config.License, ch chan<- prometheus
 					for i := range licused {
 						ch <- prometheus.MustNewConstMetric(
 							c.lmstatFeatureUsedUsersVersions, prometheus.GaugeValue,
-							licused[i].num, licenses.Name, name, username, licused[i].since, licused[i].version, licused[i].hostname)
+							licused[i].num, licenses.Name, name, username, licused[i].since, licused[i].version,
+							getHostname(licused[i].hostname, licenses.MonitorHostnames))
 					}
 				}
 			} else {
@@ -531,7 +532,8 @@ func (c *lmstatCollector) collect(licenses *config.License, ch chan<- prometheus
 					for i := range licused {
 						ch <- prometheus.MustNewConstMetric(
 							c.lmstatFeatureUsedUsers, prometheus.GaugeValue,
-							licused[i].num, licenses.Name, name, username, licused[i].since, licused[i].hostname)
+							licused[i].num, licenses.Name, name, username, licused[i].since,
+							getHostname(licused[i].hostname, licenses.MonitorHostnames))
 					}
 				}
 			}
@@ -608,4 +610,12 @@ func convertLmstatTimeToUnixTime(lmtime string, logger *slog.Logger) time.Time {
 	}
 
 	return unixtime
+}
+
+func getHostname(hostname string, monitorHostnames bool) string {
+	if monitorHostnames {
+		return hostname
+	}
+
+	return ""
 }

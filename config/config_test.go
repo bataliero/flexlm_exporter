@@ -37,7 +37,7 @@ func TestLoad(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	appRegex := regexp.MustCompile(`^app\d`)
+	appRegex := regexp.MustCompile(`^(app\d|comsol)`)
 
 	for _, licenses := range testLicenseConfig.Licenses {
 		if !appRegex.MatchString(licenses.Name) {

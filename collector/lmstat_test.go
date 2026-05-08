@@ -342,25 +342,31 @@ func TestParseLmstatLicenseInfoFeature(t *testing.T) {
 
 	foundUserWithBrackets := false
 	foundUser2WithBrackets := false
+
 	for username, licused := range licUsersByFeature["feature101"] {
 		var totalLic float64
+
 		for _, lu := range licused {
 			totalLic += lu.num
 			if lu.version != "v6.3" {
 				t.Fatalf("Unexpected version for feature101[%s]: %v!=v6.3", username, lu.version)
 			}
+
 			if lu.hostname != "hostname" {
 				t.Fatalf("Unexpected hostname for feature101[%s]: %v!=hostname", username, lu.hostname)
 			}
 		}
+
 		switch username {
 		case "user":
 			foundUserWithBrackets = true
+
 			if totalLic != 1.0 {
 				t.Fatalf("Unexpected values for feature101[%s]: %v!=1", username, totalLic)
 			}
 		case "user2":
 			foundUser2WithBrackets = true
+
 			if totalLic != 1.0 {
 				t.Fatalf("Unexpected values for feature101[%s]: %v!=1", username, totalLic)
 			}
@@ -370,8 +376,36 @@ func TestParseLmstatLicenseInfoFeature(t *testing.T) {
 	if !foundUserWithBrackets {
 		t.Fatalf("Couldn't parse user \"<user>\" from feature101")
 	}
+
 	if !foundUser2WithBrackets {
 		t.Fatalf("Couldn't parse user \"<user2>\" from feature101")
+	}
+
+	foundUser102 := false
+
+	for username, licused := range licUsersByFeature["feature102"] {
+		var totalLic float64
+		for _, lu := range licused {
+			totalLic += lu.num
+			if lu.version != "v6.3" {
+				t.Fatalf("Unexpected version for feature102[%s]: %v!=v6.3", username, lu.version)
+			}
+
+			if lu.hostname != "hostname" {
+				t.Fatalf("Unexpected hostname for feature102[%s]: %v!=hostname", username, lu.hostname)
+			}
+		}
+
+		if username == "user" {
+			foundUser102 = true
+			if totalLic != 1.0 {
+				t.Fatalf("Unexpected values for feature102[%s]: %v!=1", username, totalLic)
+			}
+		}
+	}
+
+	if !foundUser102 {
+		t.Fatalf("Couldn't parse user \"<user>\" from feature102")
 	}
 
 	if licUsersByFeature["feature12"] != nil {
