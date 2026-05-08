@@ -81,12 +81,12 @@ func NewLmstatCollector(logger *slog.Logger) (Collector, error) {
 		lmstatFeatureUsedUsers: prometheus.NewDesc(
 			prometheus.BuildFQName(namespace, "feature", "used_users"),
 			"License feature used by user labeled by app, feature name and "+
-				"username of the license.", []string{"app", "name", "user", "since"}, nil,
+				"username of the license.", []string{"app", "name", "user", "since", "hostname"}, nil,
 		),
 		lmstatFeatureUsedUsersVersions: prometheus.NewDesc(
 			prometheus.BuildFQName(namespace, "feature", "used_users"),
 			"License feature used by user labeled by app, feature name, "+
-				"username of the license and version.", []string{"app", "name", "user", "since", "version"}, nil,
+				"username of the license and version.", []string{"app", "name", "user", "since", "version", "hostname"}, nil,
 		),
 		lmstatFeatureReservGroups: prometheus.NewDesc(
 			prometheus.BuildFQName(namespace, "feature", "reserved_groups"),
@@ -308,21 +308,26 @@ func parseLmstatLicenseInfoFeature(outStr [][]string, logger *slog.Logger) (feat
 			}
 
 			matches := reSubMatchMap(lmutilLicenseFeatureUsageUserRegex, lineJoined)
-			username := matches["user"]
+			username := strings.Trim(matches["user"], "<>")
+			matches["hostname"] = strings.Trim(matches["hostname"], "<>")
 
 			if strings.TrimSpace(username) == "" {
 				logger.Debug("username couldn't be found for '", lineJoined,
 					"', using lmutilLicenseFeatureUsageUser2Regex.")
 
 				matches = reSubMatchMap(lmutilLicenseFeatureUsageUser2Regex, lineJoined)
-				username = matches["user"]
+				username = strings.Trim(matches["user"], "<>")
+				matches["hostname"] = strings.Trim(matches["hostname"], "<>")
 			}
 
 			if matches["ver"] != "" {
 				var found = -1
 
+				versionStr := strings.Trim(matches["ver"], "()")
+
 				for i := range licUsersByFeature[featureName][username] {
-					if licUsersByFeature[featureName][username][i].version == matches["ver"] {
+					if licUsersByFeature[featureName][username][i].version == versionStr &&
+						licUsersByFeature[featureName][username][i].hostname == matches["hostname"] {
 						found = i
 					}
 				}
@@ -330,26 +335,29 @@ func parseLmstatLicenseInfoFeature(outStr [][]string, logger *slog.Logger) (feat
 				if found < 0 {
 					unixSince := convertLmstatTimeToUnixTime(matches["since"], logger).Unix()
 					sinceString := strconv.FormatInt(unixSince, 10)
+
 					licUsersByFeature[featureName][username] = append(licUsersByFeature[featureName][username],
-						&featureUserUsed{num: 0, version: matches["ver"], since: sinceString})
-				}
-			}
-
-			if matches["licenses"] != "" {
-				licUsed, err := strconv.Atoi(matches["licenses"])
-				if err != nil {
-					logger.Error("err", "could not convert", matches["licenses"], "to integer:", err)
+						&featureUserUsed{num: 0, version: versionStr, since: sinceString, hostname: matches["hostname"]})
 				}
 
-				for i := range licUsersByFeature[featureName][username] {
-					if licUsersByFeature[featureName][username][i].version == matches["ver"] {
-						licUsersByFeature[featureName][username][i].num += float64(licUsed)
+				if matches["licenses"] != "" {
+					licUsed, err := strconv.Atoi(matches["licenses"])
+					if err != nil {
+						logger.Error("err", "could not convert", matches["licenses"], "to integer:", err)
 					}
-				}
-			} else {
-				for i := range licUsersByFeature[featureName][username] {
-					if licUsersByFeature[featureName][username][i].version == matches["ver"] {
-						licUsersByFeature[featureName][username][i].num += 1.0
+
+					for i := range licUsersByFeature[featureName][username] {
+						if licUsersByFeature[featureName][username][i].version == versionStr &&
+							licUsersByFeature[featureName][username][i].hostname == matches["hostname"] {
+							licUsersByFeature[featureName][username][i].num += float64(licUsed)
+						}
+					}
+				} else {
+					for i := range licUsersByFeature[featureName][username] {
+						if licUsersByFeature[featureName][username][i].version == versionStr &&
+							licUsersByFeature[featureName][username][i].hostname == matches["hostname"] {
+							licUsersByFeature[featureName][username][i].num += 1.0
+						}
 					}
 				}
 			}
@@ -515,7 +523,8 @@ func (c *lmstatCollector) collect(licenses *config.License, ch chan<- prometheus
 					for i := range licused {
 						ch <- prometheus.MustNewConstMetric(
 							c.lmstatFeatureUsedUsersVersions, prometheus.GaugeValue,
-							licused[i].num, licenses.Name, name, username, licused[i].since, licused[i].version)
+							licused[i].num, licenses.Name, name, username, licused[i].since, licused[i].version,
+							getHostname(licused[i].hostname, licenses.MonitorHostnames))
 					}
 				}
 			} else {
@@ -523,7 +532,8 @@ func (c *lmstatCollector) collect(licenses *config.License, ch chan<- prometheus
 					for i := range licused {
 						ch <- prometheus.MustNewConstMetric(
 							c.lmstatFeatureUsedUsers, prometheus.GaugeValue,
-							licused[i].num, licenses.Name, name, username, licused[i].since)
+							licused[i].num, licenses.Name, name, username, licused[i].since,
+							getHostname(licused[i].hostname, licenses.MonitorHostnames))
 					}
 				}
 			}
@@ -600,4 +610,12 @@ func convertLmstatTimeToUnixTime(lmtime string, logger *slog.Logger) time.Time {
 	}
 
 	return unixtime
+}
+
+func getHostname(hostname string, monitorHostnames bool) string {
+	if monitorHostnames {
+		return hostname
+	}
+
+	return ""
 }

@@ -35,6 +35,7 @@ type License struct {
 	MonitorUsers        bool   `yaml:"monitor_users"`
 	MonitorReservations bool   `yaml:"monitor_reservations"`
 	MonitorVersions     bool   `yaml:"monitor_versions,omitempty"`
+	MonitorHostnames    bool   `yaml:"monitor_hostnames,omitempty"`
 }
 
 // Configuration type for all licenses.
