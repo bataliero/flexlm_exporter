@@ -19,6 +19,7 @@ import (
 	"strconv"
 	"testing"
 	"time"
+	"regexp"
 
 	"github.com/prometheus/common/promslog"
 )
@@ -171,6 +172,60 @@ func TestParseLmstatLicenseInfoServer(t *testing.T) {
 			t.Fatalf("Unexpected values for %s: %s, %t, %t",
 				info.fqdn, info.version, info.master, info.status)
 		}
+	}
+}
+
+func TestReSubMatchMap(t *testing.T) {
+	t.Parallel()
+
+	r := regexp.MustCompile(`(?P<first>[a-zA-Z]+) (?P<last>[a-zA-Z]+)`)
+	rEdge := regexp.MustCompile(`(?P<first>[a-zA-Z]+) ([a-zA-Z]+)`)
+
+	tests := []struct {
+		name     string
+		r        *regexp.Regexp
+		str      string
+		expected map[string]string
+	}{
+		{
+			name: "happy path",
+			r:    r,
+			str:  "John Doe",
+			expected: map[string]string{
+				"first": "John",
+				"last":  "Doe",
+			},
+		},
+		{
+			name: "edge case - unnamed group",
+			r:    rEdge,
+			str:  "John Doe",
+			expected: map[string]string{
+				"first": "John",
+			},
+		},
+		{
+			name:     "error condition - no match",
+			r:        r,
+			str:      "123",
+			expected: map[string]string{},
+		},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			got := reSubMatchMap(tt.r, tt.str)
+			if len(got) != len(tt.expected) {
+				t.Errorf("reSubMatchMap() returned %v, want %v", got, tt.expected)
+			}
+			for k, v := range tt.expected {
+				if got[k] != v {
+					t.Errorf("reSubMatchMap() returned %v for key %v, want %v", got[k], k, v)
+				}
+			}
+		})
 	}
 }
 
