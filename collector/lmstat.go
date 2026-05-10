@@ -125,6 +125,11 @@ func (c *lmstatCollector) Update(ch chan<- prometheus.Metric) error {
 	return nil
 }
 
+// isValidConfigTarget checks if the target configuration (file or server) is valid and safe.
+func isValidConfigTarget(target string) bool {
+	return !strings.HasPrefix(target, "-")
+}
+
 // contains check if an array contains a string.
 func contains(slice []string, item string) bool {
 	set := make(map[string]struct{}, len(slice))
@@ -435,11 +440,17 @@ func (c *lmstatCollector) collect(licenses *config.License, ch chan<- prometheus
 	// Call lmstat with -a (display everything)
 	switch {
 	case licenses.LicenseFile != "":
+		if !isValidConfigTarget(licenses.LicenseFile) {
+			return fmt.Errorf("invalid `license_file` for %v: cannot start with a hyphen", licenses.Name)
+		}
 		outBytes, err = lmutilOutput(c.logger, "lmstat", "-c", licenses.LicenseFile, "-a")
 		if err != nil {
 			return err
 		}
 	case licenses.LicenseServer != "":
+		if !isValidConfigTarget(licenses.LicenseServer) {
+			return fmt.Errorf("invalid `license_server` for %v: cannot start with a hyphen", licenses.Name)
+		}
 		outBytes, err = lmutilOutput(c.logger, "lmstat", "-c", licenses.LicenseServer, "-a")
 		if err != nil {
 			return err

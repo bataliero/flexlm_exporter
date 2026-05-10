@@ -20,6 +20,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/mjtrangoni/flexlm_exporter/config"
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/common/promslog"
 )
 
@@ -33,6 +35,69 @@ const (
 	testParseLmstatServerDown   = "fixtures/lmstat_server_down.txt"
 	testParseLmstatServerUp     = "fixtures/lmstat_server_up_win.txt"
 )
+
+func TestIsValidConfigTarget(t *testing.T) {
+	t.Parallel()
+
+	validTargets := []string{
+		"28000@host",
+		"host",
+		"port@host",
+		"localhost",
+		"/usr/local/flexlm/licenses/license.dat",
+		"./license.dat",
+		"license.dat",
+		"C:\\flexlm\\license.dat",
+	}
+
+	for _, target := range validTargets {
+		if !isValidConfigTarget(target) {
+			t.Fatalf("Expected target %s to be valid", target)
+		}
+	}
+
+	invalidTargets := []string{
+		"-c",
+		"--version",
+		"-something",
+	}
+
+	for _, target := range invalidTargets {
+		if isValidConfigTarget(target) {
+			t.Fatalf("Expected target %s to be invalid", target)
+		}
+	}
+}
+
+func TestLmstatCollectorCollectInvalidPath(t *testing.T) {
+	t.Parallel()
+
+	logger := promslog.New(&promslog.Config{})
+	c, _ := NewLmstatCollector(logger)
+	collector := c.(*lmstatCollector)
+
+	invalidLicense := &config.License{
+		Name:        "invalid_test",
+		LicenseFile: "-invalid_file",
+	}
+
+	ch := make(chan prometheus.Metric)
+
+	err := collector.collect(invalidLicense, ch)
+	if err == nil {
+		t.Fatalf("Expected error when collecting with invalid license_file starting with '-'")
+	}
+
+	invalidLicenseServer := &config.License{
+		Name:          "invalid_test_server",
+		LicenseServer: "-invalid_server",
+	}
+
+	err = collector.collect(invalidLicenseServer, ch)
+	if err == nil {
+		t.Fatalf("Expected error when collecting with invalid license_server starting with '-'")
+	}
+}
 
 func TestContains(t *testing.T) {
 	t.Parallel()
