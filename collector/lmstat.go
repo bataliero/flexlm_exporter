@@ -554,8 +554,12 @@ func reSubMatchMap(r *regexp.Regexp, str string) map[string]string {
 	match := r.FindStringSubmatch(str)
 	subMatchMap := make(map[string]string)
 
+	if match == nil {
+		return subMatchMap
+	}
+
 	for i, name := range r.SubexpNames() {
-		if i != 0 {
+		if i != 0 && name != "" {
 			subMatchMap[name] = match[i]
 		}
 	}
