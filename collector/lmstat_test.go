@@ -16,10 +16,10 @@ package collector
 
 import (
 	"os"
+	"regexp"
 	"strconv"
 	"testing"
 	"time"
-	"regexp"
 
 	"github.com/prometheus/common/promslog"
 )
@@ -216,10 +216,12 @@ func TestReSubMatchMap(t *testing.T) {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			got := reSubMatchMap(tt.r, tt.str)
 			if len(got) != len(tt.expected) {
 				t.Errorf("reSubMatchMap() returned %v, want %v", got, tt.expected)
 			}
+
 			for k, v := range tt.expected {
 				if got[k] != v {
 					t.Errorf("reSubMatchMap() returned %v for key %v, want %v", got[k], k, v)
