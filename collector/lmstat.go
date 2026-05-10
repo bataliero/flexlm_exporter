@@ -443,6 +443,7 @@ func (c *lmstatCollector) collect(licenses *config.License, ch chan<- prometheus
 		if !isValidConfigTarget(licenses.LicenseFile) {
 			return fmt.Errorf("invalid `license_file` for %v: cannot start with a hyphen", licenses.Name)
 		}
+
 		outBytes, err = lmutilOutput(c.logger, "lmstat", "-c", licenses.LicenseFile, "-a")
 		if err != nil {
 			return err
@@ -451,6 +452,7 @@ func (c *lmstatCollector) collect(licenses *config.License, ch chan<- prometheus
 		if !isValidConfigTarget(licenses.LicenseServer) {
 			return fmt.Errorf("invalid `license_server` for %v: cannot start with a hyphen", licenses.Name)
 		}
+
 		outBytes, err = lmutilOutput(c.logger, "lmstat", "-c", licenses.LicenseServer, "-a")
 		if err != nil {
 			return err

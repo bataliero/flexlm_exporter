@@ -192,6 +192,7 @@ func (c *lmstatFeatureExpCollector) collect(licenses *config.License, ch chan<- 
 		if !isValidConfigTarget(licenses.LicenseFile) {
 			return fmt.Errorf("invalid `license_file` for %v: cannot start with a hyphen", licenses.Name)
 		}
+
 		outBytes, err = lmutilOutput(c.logger, "lmstat", "-c", licenses.LicenseFile, "-i")
 		if err != nil {
 			return err
@@ -200,6 +201,7 @@ func (c *lmstatFeatureExpCollector) collect(licenses *config.License, ch chan<- 
 		if !isValidConfigTarget(licenses.LicenseServer) {
 			return fmt.Errorf("invalid `license_server` for %v: cannot start with a hyphen", licenses.Name)
 		}
+
 		outBytes, err = lmutilOutput(c.logger, "lmstat", "-c", licenses.LicenseServer, "-i")
 		if err != nil {
 			return err
